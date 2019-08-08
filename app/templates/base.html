@@ -1,0 +1,83 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}
+    {% if title %}{{ title }} - FaceSmash{% else %}Welcome to Microblog{% endif %}
+{% endblock %}
+
+{% block navbar %}
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('index') }}">FaceSmash</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                </ul>
+            </div>
+        </div>
+          </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-info" role="alert">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {# application content needs to be provided in the app_content block #}
+        {% block app_content %}{% endblock %}
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script>
+        function translate(num) {
+        img1 = $('#img1').attr('src');
+        img2 = $('#img2').attr('src');
+        console.log(img1);
+        //$.post('/givenext', {
+        //        selected: num,
+        //        img1: img1,
+        //        img2: img2
+        //    }).done(function(result) {
+        //        $('#img1').attr('src', result['img1']);
+        //        $('#img2').attr('src', result['img2']);
+        //        
+        //    }).fail(function() {
+        //        $(destId).text("Error: Could not contact server.");
+        //    });
+        $.ajax({
+            url: '/givenext',
+            type: 'post',
+            dataType: 'json',
+            data: { selected: num, img1: img1, img2: img2 },
+    
+            success: function (result) {
+    
+                $('#img1').attr('src', result['img1']);
+                $('#img2').attr('src', result['img2']);
+    
+            },
+            complete: function () {
+                // Schedule the next request when the current one has been completed
+                
+            }
+        });
+        }
+    </script>
+        
+{% endblock %}
