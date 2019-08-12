@@ -29,10 +29,11 @@ def givenext():
     cooka = decrypt(SECRET_KEY, cooka)
     (im1, im2), cooka = get_next_images(cooka)
     cooka = encrypt(SECRET_KEY, cooka)
+    print(cooka)
     return jsonify({ 
           'img1': im1,
           'img2': im2,
-	  'c': cooka })
+          'c': cooka })
 
 @app.errorhandler(404)
 def not_found_error(error):
