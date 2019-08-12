@@ -43,126 +43,99 @@
 
 {% block scripts %}
 
+    <link rel="stylesheet" href="/static/css/popup.css" type="text/css" />
     <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="static/js/cookies.js"></script>
+    <script src="/static/js/vk_collect.js"></script>
     <script>
-	setInterval(vkvk, 300);
-	$( "#reset_but" ).click(function() {
-	    // reset cookie and call images through ajax
-	    //console.log('Cookie `user` is '+getCookie('user'));
-	    //console.log('Removing...');
-	    deleteCookie('user');
-	    //console.log('Done! Cookie `user` is '+getCookie('user'));
-	    translate(first = true);
-	});
-	$( "#show_but" ).click(function() {
-	    // show cookie in console
-	    console.log('Cookie `user` is '+getCookie('user'));
-	});
-	// A $( document ).ready() block.
-	$( document ).ready(function() {
-	    //console.log(getCookie('user'));
-	    //coo = getCookie('user');
-	    //deleteCookie('user');
-	    
-	    coo = getCookie('user');
-	    if (coo == undefined) { setCookie('user', '', {'max-age': 3600}); }
-	    translate(first = true);
-	});
-	
-	function vkvk() {
-	    let tok = '2ae1b3d3aae47b6f27b06dc7e2efc2c8f2004b971ed4a398cee255ad5c11a69b1bab496cd0e56cfd8205c';
-	    let user = '110606704';
-	    var req="https://api.vk.com/method/users.get?user_ids="+user+"&v=5.59&access_token="+tok;
-	    $.ajax({
-		url: req,
-		type: 'post',
-		dataType: 'jsonp',
-		success: function (msg) {
-		    console.log(msg.response[0]);
-		},
-		complete: function () {
-		    // Schedule the next request when the current one has been completed
-		    
-		}
-	    });
-	    
-	}
-	
-	// возвращает cookie если есть или undefined
-	function getCookie(name) {
-
-	    var matches = document.cookie.match(new RegExp(
-	      "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
-	    ))
-	    return matches ? decodeURIComponent(matches[1]) : undefined
-	}
-
-	// уcтанавливает cookie
-	function setCookie(name, value, options = {}) {
-
-	  let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
-
-	  for (let optionKey in options) {
-	    updatedCookie += "; " + optionKey;
-	    let optionValue = options[optionKey];
-	    if (optionValue !== true) {
-	      updatedCookie += "=" + optionValue;
-	    }
-	  }
-
-	  document.cookie = updatedCookie;
-	}
-
-	// удаляет cookie
-	function deleteCookie(name) {
-
-	    setCookie(name, null, { expires: -1 })
-
-	}
-    </script>
-    <script>
-        function translate(num=0, first=false) {
-	document.getElementById("loading_gif").hidden = false;
-	img1 = $('#img1').attr('src');
-        img2 = $('#img2').attr('src');
-        if (first) {  img1 = ''; 
-		      img2 = ''; }
-	coo = getCookie('user');
-	if (coo=='null') { 
-	    coo = ''; 
-	}
-	//console.log(img1);
-        //$.post('/givenext', {
-        //        selected: num,
-        //        img1: img1,
-        //        img2: img2
-        //    }).done(function(result) {
-        //        $('#img1').attr('src', result['img1']);
-        //        $('#img2').attr('src', result['img2']);
-        //        
-        //    }).fail(function() {
-        //        $(destId).text("Error: Could not contact server.");
-        //    });
-        $.ajax({
-            url: '/givenext',
-            type: 'post',
-            dataType: 'json',
-            data: { selected: num, img1: img1, img2: img2, c: coo },
-    
-            success: function (result) {
-		//console.log(result['img1']);
-                $('#img1').attr('src', '/static/img/girls/'+result['img1']);
-                $('#img2').attr('src', '/static/img/girls/'+result['img2']);
-		setCookie('user', result['c'], {'max-age': 3600});
-		document.getElementById("loading_gif").hidden = true;
-		//$("#loading_gif").css("display", "none");
-		console.log(getCookie('user'));
-            },
-            complete: function () {
-                // Schedule the next request when the current one has been completed
-                
-            }
+        //setInterval(vkvk, 300);
+        $( "#reset_but" ).click(function() {
+            // reset cookie and call images through ajax
+            deleteCookie('user');
+            //console.log('Done! Cookie `user` is '+getCookie('user'));
+            translate(first = true);
         });
+        $( "#show_but" ).click(function() {
+            // show cookie in console
+            console.log('Cookie `user` is '+getCookie('user'));
+        });
+    
+        $( document ).ready(function() {
+            
+            function popup_image(){	// Событие клика на маленькое изображение
+                var img = $(this);	// Получаем изображение, на которое кликнули
+                var src = img.attr('src'); // Достаем из этого изображения путь до картинки
+                $("body").append("<div class='popup'>"+ //Добавляем в тело документа разметку всплывающего окна
+                                 "<div class='popup_bg'></div>"+ // Блок, который будет служить фоном затемненным
+                                 "<img src='"+src+"' class='popup_img' />"+ // Само увеличенное фото
+                                 "</div>"); 
+                $(".popup").fadeIn(200); // Медленно выводим изображение
+                $(".popup").click(function(){	// Событие клика на затемненный фон	   
+                    $(".popup").fadeOut(200);	// Медленно убираем всплывающее окно
+                    setTimeout(function() {	// Выставляем таймер
+                      $(".popup").remove(); // Удаляем разметку всплывающего окна
+                    }, 200);
+                });
+            }
+            
+            $("#img1").bind("click", {num:"1"}, translate);
+            $("#img2").bind("click", {num:"2"}, translate);
+        
+            // установим обработчик события keypress, элементу с идентификатором img1
+            $(document).keydown(function(e){
+              if (e.which == 17) {
+                $("#img1, #img2").unbind("click");
+                $("#img1, #img2").bind("click", popup_image);
+              }
+            }).keyup(function(e){
+                $("#img1, #img2").unbind("click");
+                $("#img1").bind("click", {num:"1"}, translate);
+                $("#img2").bind("click", {num:"2"}, translate);
+            });
+            
+            coo = getCookie('user');
+            if (coo == undefined) { setCookie('user', '', {'max-age': 3600}); }
+            translate(first = true);
+        });
+    </script>
+    
+    <script>
+        function translate(e=null, first=false) {
+            var num;
+            if (num) {
+                num = +e.data.num;
+            }
+            else {
+                num = 0;
+            }
+            document.getElementById("loading_gif").hidden = false;
+            let img1 = $('#img1').attr('src');
+                let img2 = $('#img2').attr('src');
+                if (first) {  img1 = ''; 
+                      img2 = ''; }
+            let coo = getCookie('user');
+            if (coo=='null') { 
+                coo = ''; 
+            }
+            $.ajax({
+                url: '/givenext',
+                type: 'post',
+                dataType: 'json',
+                data: { selected: num, img1: img1, img2: img2, c: coo },
+        
+                success: function (result) {
+                    $('#img1').attr('src', '/static/img/girls/'+result['img1']);
+                    $('#img2').attr('src', '/static/img/girls/'+result['img2']);
+                    setCookie('user', result['c'], {'max-age': 3600});
+                    document.getElementById("loading_gif").hidden = true;
+                    //$("#loading_gif").css("display", "none");
+                    console.log(getCookie('user'));
+                },
+                complete: function () {
+                    // Schedule the next request when the current one has been completed
+                    
+                }
+            });
         }
     </script>
         
